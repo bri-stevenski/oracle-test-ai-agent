@@ -1,0 +1,118 @@
+{
+  "frameworks": [
+    {
+      "name": "playwright",
+      "display_name": "Playwright",
+      "category": "e2e_ui",
+      "languages": [
+        "typescript",
+        "javascript"
+      ],
+      "ecosystems": [
+        "react",
+        "vue",
+        "angular",
+        "node"
+      ],
+      "status": "preferred",
+      "maturity": "high",
+      "community_size": "large",
+      "recommended_for": [
+        "end-to-end testing",
+        "cross-browser testing",
+        "modern frontend applications"
+      ],
+      "strengths": [
+        "Reliable auto-waiting",
+        "Strong TypeScript support",
+        "Modern testing architecture",
+        "Fast execution"
+      ],
+      "avoid_when": [
+        "legacy selenium-only environments"
+      ]
+    },
+    {
+      "name": "vitest",
+      "display_name": "Vitest",
+      "category": "frontend_unit",
+      "languages": [
+        "typescript",
+        "javascript"
+      ],
+      "ecosystems": [
+        "vite",
+        "react",
+        "vue"
+      ],
+      "status": "preferred",
+      "maturity": "high",
+      "community_size": "large",
+      "recommended_for": [
+        "frontend unit testing",
+        "component testing",
+        "modern vite ecosystems"
+      ],
+      "strengths": [
+        "Fast execution",
+        "Modern developer experience",
+        "Vite-native integration"
+      ],
+      "avoid_when": [
+        "legacy jest-only environments"
+      ]
+    },
+    {
+      "name": "pytest",
+      "display_name": "pytest",
+      "category": "python_unit",
+      "languages": [
+        "python"
+      ],
+      "ecosystems": [
+        "python"
+      ],
+      "status": "preferred",
+      "maturity": "very_high",
+      "community_size": "massive",
+      "recommended_for": [
+        "python backend testing",
+        "api testing",
+        "integration testing"
+      ],
+      "strengths": [
+        "Extremely mature ecosystem",
+        "Powerful fixtures",
+        "Excellent plugin ecosystem"
+      ],
+      "avoid_when": []
+    },
+    {
+      "name": "k6",
+      "display_name": "k6",
+      "category": "performance",
+      "languages": [
+        "javascript"
+      ],
+      "ecosystems": [
+        "api",
+        "backend",
+        "microservices"
+      ],
+      "status": "preferred",
+      "maturity": "high",
+      "community_size": "large",
+      "recommended_for": [
+        "performance testing",
+        "load testing",
+        "api stress testing"
+      ],
+      "strengths": [
+        "Developer-friendly scripting",
+        "Strong CI/CD integration",
+        "Modern architecture"
+      ],
+      "avoid_when": []
+    }
+  ]
+}
