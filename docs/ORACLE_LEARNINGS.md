@@ -29,6 +29,10 @@ Abstracting model access enables:
 - prompt centralization
 - cleaner architecture
 
-## 5. Opinionated design improves quality
+## 6. Lazy LLM initialization is crucial for DX
 
-Oracle intentionally selects frameworks rather than offering all options.
+Coupling module imports to API credential checks breaks non-generative commands (like `--version`) and unit tests. Initializing the LLM client only at the moment of execution (lazy loading) ensures the tool remains usable in restricted or non-connected environments.
+
+## 7. Recommendation-only mode bridges the trust gap
+
+Providing a `--recommend-only` flag allows users to validate Oracle's engineering decisions before committing to a full generation cycle. This transparency builds trust and saves tokens.
