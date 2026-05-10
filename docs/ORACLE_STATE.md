@@ -2,7 +2,8 @@
 
 ## 🧠 System Status
 
-Oracle is a functional AI-assisted test automation CLI tool. It can classify user intent, recommend frameworks, and generate production-ready test code.
+Oracle is a functional AI-assisted test automation CLI tool. It can classify
+user intent, recommend frameworks, and generate production-ready test code.
 
 ## ✅ Implemented Components
 
@@ -15,7 +16,8 @@ Oracle is a functional AI-assisted test automation CLI tool. It can classify use
 
 ## ⚙️ Architecture Summary
 
-User Prompt → CLI → Orchestrator → Classifier → Recommender → LLM → Generated Test Output
+User Prompt → CLI → Orchestrator → Classifier → Recommender → LLM →
+Generated Test Output
 
 ## ❗ Current Limitation
 
@@ -24,4 +26,5 @@ Generated tests are not yet automatically executed or verified by Oracle.
 ## 🎯 Next Step
 
 Implement Execution Feedback Loop:
+
 - `oracle run <file>` or automatic execution after generation

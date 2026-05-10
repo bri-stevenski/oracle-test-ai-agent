@@ -31,8 +31,13 @@ Abstracting model access enables:
 
 ## 6. Lazy LLM initialization is crucial for DX
 
-Coupling module imports to API credential checks breaks non-generative commands (like `--version`) and unit tests. Initializing the LLM client only at the moment of execution (lazy loading) ensures the tool remains usable in restricted or non-connected environments.
+Coupling module imports to API credential checks breaks non-generative commands
+(like `--version`) and unit tests. Initializing the LLM client only at the
+moment of execution (lazy loading) ensures the tool remains usable in
+restricted or non-connected environments.
 
 ## 7. Recommendation-only mode bridges the trust gap
 
-Providing a `--recommend-only` flag allows users to validate Oracle's engineering decisions before committing to a full generation cycle. This transparency builds trust and saves tokens.
+Providing a `--recommend-only` flag allows users to validate Oracle's
+engineering decisions before committing to a full generation cycle. This
+transparency builds trust and saves tokens.

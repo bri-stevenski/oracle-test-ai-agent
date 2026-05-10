@@ -28,7 +28,9 @@ Missing:
 ## 🧭 Product Stage
 
 Oracle is currently:
+
 > Functional developer CLI tool for test generation
 
 Target:
+
 > Fully autonomous test debugging and self-healing engine
