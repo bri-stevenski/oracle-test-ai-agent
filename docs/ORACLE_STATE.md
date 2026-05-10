@@ -2,26 +2,29 @@
 
 ## 🧠 System Status
 
-Oracle is currently a working AI-assisted test automation architecture with an implemented internal intelligence pipeline, but no CLI interface yet.
+Oracle is a functional AI-assisted test automation CLI tool. It can classify
+user intent, recommend frameworks, and generate production-ready test code.
 
 ## ✅ Implemented Components
 
-- Framework registry (registry.json)
+- Framework registry (registry.json with extension support)
 - Test classifier (rule-based intent detection)
 - Framework recommender (engineering decision layer)
 - Orchestrator (end-to-end pipeline)
-- LLM abstraction layer (client + service wrapper)
+- LLM abstraction layer (lazy initialization, client + service wrapper)
+- CLI Interface (oracle generate, version)
 
 ## ⚙️ Architecture Summary
 
-User Prompt → Classifier → Recommender → Orchestrator → LLM → Generated Test Output
+User Prompt → CLI → Orchestrator → Classifier → Recommender → LLM →
+Generated Test Output
 
 ## ❗ Current Limitation
 
-System is not yet exposed as a CLI tool. It cannot be executed directly from terminal.
+Generated tests are not yet automatically executed or verified by Oracle.
 
 ## 🎯 Next Step
 
-Implement CLI layer:
+Implement Execution Feedback Loop:
 
-- `oracle generate "<prompt>"`
+- `oracle run <file>` or automatic execution after generation
