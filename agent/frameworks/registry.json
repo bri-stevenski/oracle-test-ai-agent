@@ -8,6 +8,7 @@
         "typescript",
         "javascript"
       ],
+      "file_extension": "spec.ts",
       "ecosystems": [
         "react",
         "vue",
@@ -40,6 +41,7 @@
         "typescript",
         "javascript"
       ],
+      "file_extension": "test.ts",
       "ecosystems": [
         "vite",
         "react",
@@ -69,6 +71,7 @@
       "languages": [
         "python"
       ],
+      "file_extension": "test.py",
       "ecosystems": [
         "python"
       ],
@@ -94,6 +97,7 @@
       "languages": [
         "javascript"
       ],
+      "file_extension": "load.js",
       "ecosystems": [
         "api",
         "backend",

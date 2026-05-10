@@ -7,25 +7,19 @@
 - Framework recommender engine
 - Orchestrator pipeline
 - LLM abstraction layer
+- CLI Interface (`oracle generate`)
 
 ## 🚧 Current State
 
-System is fully architected and internally functional.
+System is fully architected and terminal-ready.
 
 Missing:
 
-- CLI interface (terminal usability layer)
+- Execution Feedback Loop (future)
 
-## ⏭️ Next Milestone: CLI Integration
+## ⏭️ Next Milestone: Execution Feedback Loop
 
-### TICKET-027 — CLI Interface
-
-- `oracle generate "<prompt>"`
-- Connect CLI → orchestrator
-- Print structured output
-- Write generated files
-
-### TICKET-028 — Execution Feedback Loop (future)
+### TICKET-028 — Execution Feedback Loop
 
 - Run generated tests
 - Capture failures
@@ -34,7 +28,7 @@ Missing:
 ## 🧭 Product Stage
 
 Oracle is currently:
-> Internal AI engineering pipeline (non-user-facing)
+> Functional developer CLI tool for test generation
 
 Target:
-> Fully usable developer CLI tool for test generation and debugging
+> Fully autonomous test debugging and self-healing engine

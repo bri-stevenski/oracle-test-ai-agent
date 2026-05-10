@@ -29,6 +29,7 @@ class OracleOrchestrator:
         recommendation = self.recommender.recommend(classification)
 
         framework = recommendation["framework"]
+        extension = recommendation.get("file_extension", "ts")
 
         # 3. Build generation prompt
         generation_prompt = self._build_prompt(
@@ -41,7 +42,7 @@ class OracleOrchestrator:
         generated_code = generate_response(generation_prompt)
 
         # 5. Write file
-        file_path = self._write_test_file(generated_code, framework)
+        file_path = self._write_test_file(generated_code, framework, extension)
 
         return {
             "input": user_prompt,
@@ -76,14 +77,14 @@ Framework: {framework}
 - Ensure code is production-ready
 """
 
-    def _write_test_file(self, code: str, framework: str) -> Path:
+    def _write_test_file(self, code: str, framework: str, extension: str) -> Path:
         """
         Writes generated test to file system
         """
 
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-        file_name = f"{framework}_test_{timestamp}.spec.ts"
+        file_name = f"{framework}_test_{timestamp}.{extension}"
 
         file_path = self.output_dir / file_name
 

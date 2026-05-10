@@ -1,6 +1,12 @@
 from agent.llm.client import LLMClient
 
-_llm = LLMClient()
+_llm = None
+
+def get_llm():
+    global _llm
+    if _llm is None:
+        _llm = LLMClient()
+    return _llm
 
 def generate_response(prompt: str) -> str:
     """
@@ -18,4 +24,4 @@ def generate_response(prompt: str) -> str:
         }
     ]
 
-    return _llm.generate(messages)
+    return get_llm().generate(messages)

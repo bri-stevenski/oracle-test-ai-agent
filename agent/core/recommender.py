@@ -2,7 +2,7 @@
 
 from typing import Dict, List
 from agent.core.classifier import ClassificationResult
-from framework_registry import FrameworkRegistry
+from agent.core.framework_registry import FrameworkRegistry
 
 
 class FrameworkRecommender:
@@ -30,6 +30,7 @@ class FrameworkRecommender:
         return {
             "framework": selected["name"],
             "category": selected["category"],
+            "file_extension": selected.get("file_extension", "ts"),
             "reason": self._build_reason(selected)
         }
 
