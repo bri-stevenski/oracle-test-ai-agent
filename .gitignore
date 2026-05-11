@@ -175,35 +175,6 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 
-# Harness Engineering
-tests/generated/**
-.entropy-backups/**
-temp_harness/**
-
-# .harness directory (runtime artifacts)
-.harness/analyses/
-.harness/graph/
-.harness/debug/
-.harness/interactions/
-.harness/knowledge/
-.harness/sessions/
-.harness/streams/
-.harness/workspaces/
-.harness/state.json
-.harness/state/
-.harness/handoff.json
-.harness/handoff-*.json
-.harness/autopilot-state.json
-.harness/session-taint-*.json
-.harness/dispatch-last-head.txt
-.harness/health-snapshot.json
-.harness/release-readiness.json
-.harness/skills-index.json
-.harness/stack-profile.json
-.harness/metrics/
-.harness/events.jsonl
-.harness/.install-id
-.harness/telemetry.json
-.harness/.telemetry-notice-shown
-.harness/security/*
-!.harness/security/timeline.json
+# AI Generated files locally
+temp_harness/
+.entropy-backups/

@@ -21,6 +21,9 @@ integrity.
 
 ## Repository Structure
 
+### Conventions
+- **Localized Ignores:** `.gitignore` files should be located in the specific project/folder they apply to (e.g., `.harness/.gitignore`, `tests/.gitignore`) rather than being consolidated into the root `.gitignore`.
+
 ### Entry Points
 - **CLI:** [agent/cli.py](agent/cli.py) — The primary entry point for the agent. Handles command-line arguments and high-level orchestration.
 
