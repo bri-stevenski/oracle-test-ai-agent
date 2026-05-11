@@ -90,6 +90,23 @@ updated: 2026-05-11
 - **Blockers:** none
 - **Plan:** none
 
+## Provider Platform
+
+### Multi-Provider LLM Support
+
+- **Status:** in-progress
+- **Spec:** none
+- **Summary:** Bring Oracle's LLM provider matrix to parity with the
+  harness toolchain. Add first-class providers for Claude (Anthropic)
+  and Gemini (Google) alongside the existing OpenAI and Mock backends,
+  plus a Codex provider to match the harness `codex` integration.
+  Switch the default provider from OpenAI to Claude. Provider selection
+  remains driven by `ORACLE_LLM_PROVIDER`. This is a prerequisite for
+  the Project Intelligence work because context-aware prompts will
+  exceed OpenAI free-tier context windows.
+- **Blockers:** none
+- **Plan:** none
+
 ## Project Intelligence
 
 ### Metadata Scanning

@@ -8,6 +8,8 @@ version = "0.1.0"
 description = "AI-powered test automation agent"
 requires-python = ">=3.10"
 dependencies = [
+    "anthropic>=0.40,<2",
+    "google-generativeai>=0.8,<2",
     "openai>=1.50,<3",
     "typer>=0.12,<1",
     "rich>=13.7,<16",
