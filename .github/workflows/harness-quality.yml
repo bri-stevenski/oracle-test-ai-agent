@@ -34,3 +34,15 @@ jobs:
 
       - name: Harness Phase Gate
         run: npx --yes -p @harness-engineering/cli harness check-phase-gate
+
+      - name: Security Ledger Freshness
+        run: |
+          python3 scripts/security_ledger.py
+          if ! git diff --exit-code -- \
+              .harness/security/timeline.json \
+              docs/SECURITY_LEDGER.md; then
+            echo
+            echo "::error::Security ledger is stale."
+            echo "Run \`python3 scripts/security_ledger.py\` locally and commit the diff."
+            exit 1
+          fi
