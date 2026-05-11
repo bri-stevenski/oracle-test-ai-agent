@@ -10,7 +10,7 @@ using the appropriate CLI commands for each supported framework.
 import subprocess
 import shlex
 from pathlib import Path
-from typing import Tuple, Optional
+from typing import Tuple
 from agent.core.framework_registry import FrameworkRegistry
 
 class TestExecutor:
