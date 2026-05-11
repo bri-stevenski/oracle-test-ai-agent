@@ -1,0 +1,25 @@
+name: Architecture Enforcer
+
+on:
+  pull_request:
+    paths:
+      - "agent/**"
+      - "tests/**"
+      - "harness.config.json"
+      - "AGENTS.md"
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: "0 6 * * 1"
+
+jobs:
+  enforce:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: npx --yes @harness-engineering/cli check-deps --severity error
+      - run: npx --yes @harness-engineering/cli validate --severity error
