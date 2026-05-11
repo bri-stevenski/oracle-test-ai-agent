@@ -2,7 +2,7 @@
 project: oracle
 version: 1
 created: 2026-05-11
-updated: 2026-05-11
+updated: 2026-05-12
 ---
 
 # Roadmap
@@ -223,6 +223,157 @@ updated: 2026-05-11
   URLs, MCP server identifiers) — no proprietary content is committed.
   AI agents retrieve the actual content at runtime via the configured
   MCP servers or authenticated tools.
+- **Blockers:** none
+- **Plan:** none
+
+## Optum Test Ecosystem Integration (Capillary fork)
+
+> Absorbs four Optum testing repos into Oracle as first-class skills so
+> SDETs and manual testers can converse with `capillary-oracle` (and the
+> upstream harness via Oracle reference) to find users, plan tests,
+> execute them, and explore edges. Repos are referenced by path/URL —
+> source is not vendored into this repo.
+>
+> **Source repos (pointers, not vendored):**
+>
+> - `optum/test-login-helper` — browser extension (background, popup,
+>   content, shared, lib) that automates Optum login flows
+> - `optum/optum-testing-api-library` — TypeScript API client/Managers
+>   used by Playwright API suites; consumed via npm
+> - `optum/optum-testing-user-library` — TypeScript test-user catalog
+>   and helpers (per-env preconfigured users)
+> - `optum/optum-testing-ui-library` — shared UI test components/helpers
+>   for Playwright E2E
+>
+> **Personas served:** (1) SDET in an IDE/CLI extending an existing
+> Playwright/API suite; (2) manual tester in a browser via LLM
+> extension on `*.optumengage.com` with no IDE. Oracle infers persona
+> from working dir, open tabs, and recent chat history (see
+> `agent/core/orchestrator.py` context-gathering seam).
+
+### Skill: optum-test-login-helper
+
+- **Status:** planned
+- **Spec:** none
+- **Summary:** Wrap `test-login-helper` extension as an Oracle skill.
+  Manual flow: detect Optum login page, call the extension to log in as
+  a chosen user, return cookies/session for downstream steps. SDET
+  flow: surface as a Playwright fixture/codegen helper. Skill metadata
+  lists supported envs (stage, prod, etc.) and required permissions.
+- **Blockers:** Company Knowledge Integration (env→base-URL mapping)
+- **Plan:** none
+
+### Skill: optum-test-user-catalog
+
+- **Status:** planned
+- **Spec:** none
+- **Summary:** Wrap `optum-testing-user-library` as a queryable user
+  catalog skill. Inputs: environment (inferred from active tab URL,
+  `.env`, or repo config), domain (challenges, nudges, missions, …),
+  required attributes (employerId, childId, biometrics-eligible, …).
+  Outputs: candidate users with name, email, employer, employerId,
+  childId, plus any UI/dev-handoff fields. Prefers a "common user"
+  unless the test demands specifics. Flags gaps where preconfigured
+  pools are incomplete and proposes filling them (see *Test Data
+  Provisioning* below).
+- **Blockers:** none
+- **Plan:** none
+
+### Skill: optum-api-library-bridge
+
+- **Status:** planned
+- **Spec:** none
+- **Summary:** Expose `optum-testing-api-library` Managers/endpoints to
+  Oracle's recommender so generated API tests (Playwright API context
+  or Postman) call the canonical client instead of reinventing
+  requests. Registry entry maps `test_type=api & domain=optum/*` to
+  this library's calling convention.
+- **Blockers:** Classifier↔registry contract (already enforced)
+- **Plan:** none
+
+### Skill: optum-ui-library-bridge
+
+- **Status:** planned
+- **Spec:** none
+- **Summary:** Expose `optum-testing-ui-library` page objects/helpers to
+  Oracle's UI generator so generated Playwright E2E tests compose the
+  shared selectors/components instead of one-off locators.
+- **Blockers:** none
+- **Plan:** none
+
+### Context-Aware Persona & Environment Detection
+
+- **Status:** planned
+- **Spec:** none
+- **Summary:** Extend orchestrator context gathering to:
+  (a) read active browser tab URL when invoked from an LLM browser
+  extension; (b) parse `.env`, `playwright.config.*`, and other
+  config for `BASE_URL`; (c) inspect cwd, open files, and recent chat
+  history for SDET-vs-manual signal. Drives which Optum skills load
+  and which user pool is queried.
+- **Blockers:** none
+- **Plan:** none
+
+### Guided Test Planning & TCM Output
+
+- **Status:** planned
+- **Spec:** none
+- **Summary:** From a feature description, brainstorm approaches using
+  Optum skills + harness knowledge, then emit formatted test cases.
+  Capwell-style output: Markdown files for AI-friendly TCM. Optum
+  output: same Markdown plus a lightweight UI/preview so non-technical
+  testers aren't overwhelmed. Core (Capillary) output: Markdown
+  fallback until a TCM is identified.
+- **Blockers:** Company Knowledge Integration
+- **Plan:** none
+
+### Test Run & Regression Compilation
+
+- **Status:** planned
+- **Spec:** none
+- **Summary:** `oracle run` extensions to filter by domain and platform,
+  execute automated suites, or compile a manual run-sheet (with test
+  user info inlined, common user by default). Post-run: summarize
+  results and offer next actions — file a bug ticket, start debugging,
+  or open the failing test in the IDE.
+- **Blockers:** Standardized Reporting (JSON/SARIF emitter)
+- **Plan:** none
+
+### Preconditions & Test Data Provisioning
+
+- **Status:** planned
+- **Spec:** none
+- **Summary:** When a chosen user/test needs setup (mission check-in,
+  enable biometrics, create private challenge, config flip), Oracle
+  states the preconditions and either performs them via available
+  skills or hands the user a checklist and waits. Stretch goal:
+  programmatic test-data spin-up (new users, fresh state) — at minimum
+  capture as a follow-up improvement on each test.
+- **Blockers:** Company Knowledge Integration (locate the
+  config-toggle tool referenced in the knowledge graph)
+- **Plan:** none
+
+### Exploratory Edge-Case Suggestions
+
+- **Status:** planned
+- **Spec:** none
+- **Summary:** After test planning, propose super-edge cases (boundary
+  data, race conditions, locale/timezone, accessibility, partial
+  network) for exploratory sessions. Tailor depth to the user's
+  coding/automation level — explain the *why* so manual testers learn
+  alongside SDETs.
+- **Blockers:** none
+- **Plan:** none
+
+### Pedagogical Reasoning Mode
+
+- **Status:** planned
+- **Spec:** none
+- **Summary:** Track user skill signal (manual vs SDET, languages
+  observed) and annotate Oracle's choices with reasoning — why a
+  particular user was chosen, why an API test fits better than UI,
+  what the recommender weighted. Off by default for senior SDETs,
+  auto-on for first-time/manual testers.
 - **Blockers:** none
 - **Plan:** none
 <!-- /fork-only -->
