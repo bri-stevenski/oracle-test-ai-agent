@@ -1,3 +1,6 @@
+# Local Claude Code state
+.claude/
+
 # Oracle-generated test artifacts
 tests/generated/
 
