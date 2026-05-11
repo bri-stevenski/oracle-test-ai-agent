@@ -17,8 +17,8 @@ language requirements into high-quality, framework-aware test code.
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-repo/oracle-test-ai-agent.git
-cd oracle-test-ai-agent
+git clone https://github.com/bstevenski/oracle-capillary.git
+cd oracle-capillary
 
 # Install in editable mode
 pip install -e .
