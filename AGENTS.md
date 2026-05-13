@@ -9,43 +9,68 @@ integrity.
 
 ## Documentation
 
-- **Wiki Home:** [docs/wiki/Home.md](docs/wiki/Home.md)
-- **Architecture Deep Dive:** [docs/wiki/Architecture-Deep-Dive.md](docs/wiki/Architecture-Deep-Dive.md)
-- **Harness Integration:** [docs/wiki/Harness-Engineering-Integration.md](docs/wiki/Harness-Engineering-Integration.md)
-- **LLM Configuration:** [docs/wiki/LLM-Providers-and-Configuration.md](docs/wiki/LLM-Providers-and-Configuration.md)
-- **Self-Healing Loop:** [docs/wiki/Self-Healing-and-Feedback-Loop.md](docs/wiki/Self-Healing-and-Feedback-Loop.md)
+- **Wiki Home:** [Home][wiki-home]
+- **Architecture Deep Dive:** [Architecture Deep Dive][arch-deep-dive]
+- **Harness Integration:** [Harness Integration][harness-int]
+- **LLM Configuration:** [LLM Providers][llm-config]
+- **Self-Healing Loop:** [Self-Healing Loop][self-healing]
 - **Main README:** [README.md](README.md)
 - **Roadmap:** [docs/roadmap.md](docs/roadmap.md)
-- **State:** [docs/ORACLE_STATE.md](docs/ORACLE_STATE.md)
-- **Engineering Learnings:** [docs/ORACLE_LEARNINGS.md](docs/ORACLE_LEARNINGS.md)
+- **State:** [ORACLE_STATE.md](docs/ORACLE_STATE.md)
+- **Engineering Learnings:** [ORACLE_LEARNINGS.md](docs/ORACLE_LEARNINGS.md)
 
 ## Repository Structure
 
 ### Conventions
-- **Localized Ignores:** `.gitignore` files should be located in the specific project/folder they apply to (e.g., `.harness/.gitignore`, `tests/.gitignore`) rather than being consolidated into the root `.gitignore`.
+
+- **Localized Ignores:** `.gitignore` files should be located in the
+  specific project/folder they apply to (e.g., `.harness/.gitignore`,
+  `tests/.gitignore`) rather than being consolidated into the root
+  `.gitignore`.
 
 ### Entry Points
-- **CLI:** [agent/cli.py](agent/cli.py) — The primary entry point for the agent. Handles command-line arguments and high-level orchestration.
+
+- **CLI:** [agent/cli.py](agent/cli.py) — The primary entry point for
+  the agent. Handles command-line arguments and high-level orchestration.
 
 ### Core Services (`agent/core/`)
-- **Orchestrator:** [agent/core/orchestrator.py](agent/core/orchestrator.py) — Coordinates the multi-step generation and execution loop.
-- **Classifier:** [agent/core/classifier.py](agent/core/classifier.py) — Identifies requirement types and selects target frameworks based on tech stack.
-- **Scaffolder:** [agent/core/scaffolder.py](agent/core/scaffolder.py) — Generates the initial test files, boilerplate, and project structure.
-- **Executor:** [agent/core/executor.py](agent/core/executor.py) — Runs generated tests and captures execution output, logs, and errors.
-- **Recommender:** [agent/core/recommender.py](agent/core/recommender.py) — Suggests frameworks, testing strategies, and LLM providers.
-- **Framework Registry:** [agent/core/framework_registry.py](agent/core/framework_registry.py) — Internal registry for managing supported testing frameworks and their capabilities.
+
+- **Orchestrator:** [agent/core/orchestrator.py][orchestrator] —
+  Coordinates the multi-step generation and execution loop.
+- **Classifier:** [agent/core/classifier.py][classifier] — Identifies
+  requirement types and selects target frameworks based on tech stack.
+- **Scaffolder:** [agent/core/scaffolder.py][scaffolder] — Generates the
+  initial test files, boilerplate, and project structure.
+- **Executor:** [agent/core/executor.py][executor] — Runs generated tests
+  and captures execution output, logs, and errors.
+- **Recommender:** [agent/core/recommender.py][recommender] — Suggests
+  frameworks, testing strategies, and LLM providers.
+- **Framework Registry:** [agent/core/framework_registry.py][fw-registry]
+  — Internal registry for managing supported testing frameworks and their
+  capabilities.
 
 ### LLM Layer (`agent/llm/`)
-- **Client:** [agent/llm/client.py](agent/llm/client.py) — High-level LLM interaction client providing a unified interface for various providers.
-- **Factory:** [agent/llm/factory.py](agent/llm/factory.py) — Factory class for creating LLM provider instances based on project configuration.
-- **Providers:** [agent/llm/providers/](agent/llm/providers/) — Specific provider implementations (OpenAI, Gemini, Local LLMs, etc.).
+
+- **Client:** [agent/llm/client.py][llm-client] — High-level LLM
+  interaction client providing a unified interface for various providers.
+- **Factory:** [agent/llm/factory.py][llm-factory] — Factory class for
+  creating LLM provider instances based on project configuration.
+- **Providers:** [agent/llm/providers/](agent/llm/providers/) — Specific
+  provider implementations (OpenAI, Gemini, Local LLMs, etc.).
 
 ### Configuration & Data
-- **Framework Metadata:** [agent/frameworks/registry.json](agent/frameworks/registry.json) — Static definitions for framework capabilities and templates.
-- **Harness Config:** [harness.config.json](harness.config.json) — Defines architectural layers, dependency constraints, and project metadata.
+
+- **Framework Metadata:** [agent/frameworks/registry.json][fw-json] —
+  Static definitions for framework capabilities and templates.
+- **Harness Config:** [harness.config.json](harness.config.json) —
+  Defines architectural layers, dependency constraints, and project
+  metadata.
 
 ### Generated Artifacts
-- **Playwright Tests:** `tests/generated/` — Automated tests generated by the agent. These are considered output artifacts and are generally excluded from manual review.
+
+- **Playwright Tests:** `tests/generated/` — Automated tests generated
+  by the agent. These are considered output artifacts and are generally
+  excluded from manual review.
 
 ## Integration with Harness
 
@@ -55,20 +80,37 @@ Oracle integrates with the **Harness Engineering Ecosystem** by:
    generation outputs
 2. **Layered Architecture:** Strictly separating LLM calls from core
    orchestration and CLI logic (enforced by `harness.config.json`)
-3. **Mechanical Verification:** Supporting dry-runs via `--recommend-only` for
-   early validation by other harness agents (like `harness-planner`)
+3. **Mechanical Verification:** Supporting dry-runs via `--recommend-only`
+   for early validation by other harness agents (like `harness-planner`)
 
 ## Development Workflow
 
 1. **Requirement Analysis:** User provides natural language requirements.
 2. **Classification:** Oracle identifies the target testing framework and
-   language using [agent/core/classifier.py](agent/core/classifier.py).
-3. **Scaffolding:** Oracle generates the initial test structure using [agent/core/scaffolder.py](agent/core/scaffolder.py).
-4. **Execution:** Tests are executed via [agent/core/executor.py](agent/core/executor.py).
-5. **Iteration:** Based on test results, the orchestrator handles self-healing using feedback from the executor.
+   language using [agent/core/classifier.py][classifier].
+3. **Scaffolding:** Oracle generates the initial test structure using
+   [agent/core/scaffolder.py][scaffolder].
+4. **Execution:** Tests are executed via [agent/core/executor.py][executor].
+5. **Iteration:** Based on test results, the orchestrator handles
+   self-healing using feedback from the executor.
 
 ## Key Agents
 
 - **Oracle:** The primary test generator.
-- **Harness Sub-agents:** Used for architectural enforcement, planning, and
-  verification of Oracle's own codebase.
+- **Harness Sub-agents:** Used for architectural enforcement, planning,
+  and verification of Oracle's own codebase.
+
+[wiki-home]: docs/wiki/Home.md
+[arch-deep-dive]: docs/wiki/Architecture-Deep-Dive.md
+[harness-int]: docs/wiki/Harness-Engineering-Integration.md
+[llm-config]: docs/wiki/LLM-Providers-and-Configuration.md
+[self-healing]: docs/wiki/Self-Healing-and-Feedback-Loop.md
+[orchestrator]: agent/core/orchestrator.py
+[classifier]: agent/core/classifier.py
+[scaffolder]: agent/core/scaffolder.py
+[executor]: agent/core/executor.py
+[recommender]: agent/core/recommender.py
+[fw-registry]: agent/core/framework_registry.py
+[llm-client]: agent/llm/client.py
+[llm-factory]: agent/llm/factory.py
+[fw-json]: agent/frameworks/registry.json
