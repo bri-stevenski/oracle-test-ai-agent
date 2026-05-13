@@ -1,35 +1,56 @@
-# Welcome to the Oracle Wiki 🧠
+# Oracle — AI-Powered Test Generation
 
-**Oracle** is an autonomous AI test automation engineer. It bridges the
-gap between natural language requirements and high-quality, executable
-test code.
+Oracle turns plain-English descriptions of what you want to test
+into working test code. You describe the behavior; Oracle writes
+the test.
 
-## Core Mission
+## What Oracle Does
 
-To provide developers with a "God Mode" companion that not only
-generates tests but understands the architectural constraints of the
-project and self-heals when things break.
+You type something like:
 
-## Key Features
+> "Test that the login page rejects invalid passwords"
 
-- **Intelligent Classification:** Detects whether you need E2E, API,
-  Unit, or Performance tests.
-- **Expert Recommendations:** Selects the best framework (Playwright,
-  Pytest, k6, etc.) based on your specific tech stack.
-- **Provider Agnostic:** Support for OpenAI, Gemini, or Local LLMs via a
-  factory architecture.
-- **Execution Feedback Loop:** Automatically runs generated tests and
-  self-heals code using error feedback.
-- **Mechanical Safety:** Integrated with the Harness Engineering
-  ecosystem for strict architectural enforcement.
+Oracle figures out the right test type and framework, generates
+a runnable test file, and — optionally — executes it for you
+right away.
 
-## Navigation
+No boilerplate hunting. No framework wiring. Just describe the
+test you need.
 
-- [[Architecture Deep Dive]]
-- [[Harness Engineering Integration]]
-- [[LLM Providers & Configuration]]
-- [[Self-Healing & Feedback Loop]]
+## Who It's For
 
----
+- **Manual testers** moving toward automation: describe tests
+  the way you always have, let Oracle handle the code.
+- **Developers** who want quick test scaffolding without
+  context switching.
+- **QA leads** who need consistent test structure across a team.
 
-*Oracle — The future of autonomous test engineering.*
+## Start Here
+
+New to Oracle? The [Getting Started](Getting-Started.md) guide
+walks you through installation and your first generated test in
+under five minutes.
+
+Coming from manual testing?
+[For Manual Testers](For-Manual-Testers.md) explains how your
+existing skills translate directly into great Oracle prompts.
+
+## Guides
+
+- [Getting Started](Getting-Started.md) — install Oracle and
+  generate your first test
+- [For Manual Testers](For-Manual-Testers.md) — if you're new
+  to test automation
+- [Writing Good Prompts](Writing-Good-Prompts.md) — how to
+  describe tests so Oracle gets it right the first time
+- [Understanding the Harness](Understanding-the-Harness.md) —
+  what the CI checks mean and what to do when they fail
+- [Troubleshooting](Troubleshooting.md) — common errors and
+  how to fix them
+
+## Technical Reference
+
+- [Architecture Deep Dive](Architecture-Deep-Dive.md)
+- [Harness Engineering Integration](Harness-Engineering-Integration.md)
+- [LLM Providers & Configuration](LLM-Providers-and-Configuration.md)
+- [Self-Healing & Feedback Loop](Self-Healing-and-Feedback-Loop.md)

@@ -1,0 +1,57 @@
+name: Wiki Sync
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "docs/wiki/**"
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Push docs/wiki to GitHub Wiki
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          SHA: ${{ github.sha }}
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email \
+            "github-actions[bot]@users.noreply.github.com"
+
+          WIKI_URL="https://x-access-token:${GH_TOKEN}@github.com/${REPO}.wiki.git"
+
+          # Clone the wiki if it exists, otherwise init a fresh
+          # local repo pointing at the wiki remote. The wiki git
+          # repo doesn't exist until at least one page has been
+          # created via the GitHub UI; the fresh-init path handles
+          # that first-run case.
+          if git clone "$WIKI_URL" wiki-repo 2>/dev/null; then
+            echo "Cloned existing wiki."
+          else
+            echo "Wiki not yet initialized — creating fresh repo."
+            mkdir -p wiki-repo
+            cd wiki-repo
+            git init
+            git checkout -b master
+            git remote add origin "$WIKI_URL"
+            cd ..
+          fi
+
+          cp docs/wiki/*.md wiki-repo/
+
+          cd wiki-repo
+          git add .
+          if git diff --cached --exit-code; then
+            echo "No wiki changes to push."
+          else
+            git commit -m "docs: sync wiki from main (${SHA})"
+            git push origin HEAD:master
+          fi
