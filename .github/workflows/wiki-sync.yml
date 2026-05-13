@@ -17,15 +17,17 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Push docs/wiki to GitHub Wiki
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          SHA: ${{ github.sha }}
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email \
             "github-actions[bot]@users.noreply.github.com"
 
-          git clone \
-            "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@\
-github.com/${{ github.repository }}.wiki.git" \
-            wiki-repo
+          WIKI_URL="https://x-access-token:${GH_TOKEN}@github.com/${REPO}.wiki.git"
+          git clone "$WIKI_URL" wiki-repo
 
           cp docs/wiki/*.md wiki-repo/
 
@@ -34,7 +36,6 @@ github.com/${{ github.repository }}.wiki.git" \
           if git diff --cached --exit-code; then
             echo "No wiki changes to push."
           else
-            git commit -m \
-              "docs: sync wiki from main (${{ github.sha }})"
+            git commit -m "docs: sync wiki from main (${SHA})"
             git push
           fi
