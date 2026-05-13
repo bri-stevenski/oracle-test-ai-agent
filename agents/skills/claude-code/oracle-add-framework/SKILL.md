@@ -69,7 +69,7 @@
 ## Oracle Integration
 
 - **`agent/frameworks/registry.json`** — Source of truth for entries.
-- **`agent/core/framework_registry.py`** — Loader and lookup methods. Don't add lookup helpers here unless the existing four (`get_all`, `get_by_category`, `get_preferred_by_category`, `find_by_name`, `match_by_language`) genuinely don't fit.
+- **`agent/core/framework_registry.py`** — Loader and lookup methods. Don't add lookup helpers here unless the existing five (`get_all_frameworks`, `get_by_category`, `get_preferred_by_category`, `find_by_name`, `match_by_language`) genuinely don't fit.
 - **`agent/core/classifier.py`** — Routing rules. Coordinate changes with registry entries.
 - **`tests/unit/test_orchestrator.py`** — Contract enforcement. Non-null resolution per `test_type` (api → pytest, e2e_ui → playwright, performance → k6, etc.) is asserted here. `tests/unit/test_factory.py` separately enforces the LLM provider matrix.
 

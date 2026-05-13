@@ -20,7 +20,7 @@ Frameworks are not hard-coded in the orchestrator. They live in `agent/framework
 
 ### 3. Pluggable LLM Providers
 
-`agent/llm/factory.py` picks a provider at call time from `OracleProvider` env config. Currently supported: `anthropic` (default), `gemini`, `openai`, `mock`. Providers implement the `agent/llm/providers/base.py` contract — input prompt and provider-specific config in, completion string out.
+`agent/llm/factory.py` picks a provider at call time from `ORACLE_LLM_PROVIDER` env config. Currently supported: `anthropic` (default), `gemini`, `openai`, `mock`. Providers implement the `agent/llm/providers/base.py` contract — input prompt and provider-specific config in, completion string out.
 
 ### 4. Generated-Test Conventions
 

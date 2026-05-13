@@ -39,9 +39,7 @@
 
 ### Phase 4: PROMOTE — Move from Generated to Committed
 
-1. **Decide if this test belongs in the suite.** Generated tests are gitignored by default — they are a scratch space. Only promote a test that has been reviewed and validates a real, durable behavior.
-2. **Move under the appropriate suite directory.** `tests/generated/api/foo.py` → `tests/api/foo.py`. Adjust imports and fixtures to match the surrounding suite conventions.
-3. **Drop the generation header.** The timestamped header is useful in scratch; remove or replace it when promoting.
+If the generated test passes review and belongs in the committed suite, use the [`oracle-promote-test`](../oracle-promote-test/SKILL.md) skill. Promotion is its own workflow — don't collapse it into this one.
 
 ## Oracle Integration
 
