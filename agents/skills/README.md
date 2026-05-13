@@ -48,6 +48,13 @@ adjustments.
   Enforces the classifier↔registry contract, authors the registry
   entry, validates the execution command, and updates docs + state.
 
+### Setup
+
+- [`oracle-setup-harness`](./claude-code/oracle-setup-harness/SKILL.md)
+  — Configure the Harness Engineering guardrails in a new Oracle
+  project or fork. Installs the harness CLI, initialises the
+  config, wires up CI workflows, and verifies all gates pass.
+
 ## SKILL.md Format
 
 Every skill in this tree follows the same structure:

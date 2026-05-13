@@ -1,0 +1,37 @@
+name: Wiki Sync
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "docs/wiki/**"
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Push docs/wiki to GitHub Wiki
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email \
+            "github-actions[bot]@users.noreply.github.com"
+
+          git clone \
+            "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@\
+github.com/${{ github.repository }}.wiki.git" \
+            wiki-repo
+
+          cp docs/wiki/*.md wiki-repo/
+
+          cd wiki-repo
+          git add .
+          if git diff --cached --exit-code; then
+            echo "No wiki changes to push."
+          else
+            git commit -m \
+              "docs: sync wiki from main (${{ github.sha }})"
+            git push
+          fi
