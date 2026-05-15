@@ -27,7 +27,7 @@ class TestProviderFactory(unittest.TestCase):
         # Lock in the provider matrix we promise users.
         self.assertEqual(
             set(ProviderFactory.available_providers()),
-            {"anthropic", "gemini", "openai", "mock"},
+            {"anthropic", "codex", "gemini", "mock", "openai"},
         )
 
     def test_mock_provider_selection(self):
@@ -49,6 +49,18 @@ class TestProviderFactory(unittest.TestCase):
     def test_gemini_provider_requires_key(self):
         os.environ["ORACLE_LLM_PROVIDER"] = "gemini"
         os.environ.pop("GEMINI_API_KEY", None)
+        with self.assertRaises(RuntimeError):
+            ProviderFactory.get_provider()
+
+    def test_openai_provider_requires_key(self):
+        os.environ["ORACLE_LLM_PROVIDER"] = "openai"
+        os.environ.pop("OPENAI_API_KEY", None)
+        with self.assertRaises(RuntimeError):
+            ProviderFactory.get_provider()
+
+    def test_codex_provider_requires_key(self):
+        os.environ["ORACLE_LLM_PROVIDER"] = "codex"
+        os.environ.pop("OPENAI_API_KEY", None)
         with self.assertRaises(RuntimeError):
             ProviderFactory.get_provider()
 

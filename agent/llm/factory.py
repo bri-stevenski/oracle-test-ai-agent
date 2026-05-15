@@ -19,6 +19,7 @@ from agent.llm.providers.base import BaseProvider
 _PROVIDER_REGISTRY: Dict[str, Tuple[str, str]] = {
     # name -> (module_path, class_name)
     "anthropic": ("agent.llm.providers.anthropic", "AnthropicProvider"),
+    "codex": ("agent.llm.providers.codex", "CodexProvider"),
     "gemini": ("agent.llm.providers.gemini", "GeminiProvider"),
     "openai": ("agent.llm.providers.openai", "OpenAIProvider"),
     "mock": ("agent.llm.providers.mock", "MockProvider"),
