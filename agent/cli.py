@@ -60,7 +60,7 @@ def generate(
                 "test_type": classification.test_type,
                 "framework": result["framework"],
                 "file_extension": result["file_extension"],
-                "reasoning": result["reason"]
+                "reasoning": result["reasoning"],
             }, indent=2))
             return
 
@@ -68,7 +68,7 @@ def generate(
         print(f"[bold]Test Type:[/bold] {classification.test_type}")
         print(f"[bold]Framework:[/bold] {result['framework']}")
         print("\n[bold]Reasoning:[/bold]")
-        for r in result["reason"]:
+        for r in result["reasoning"]:
             print(f" - {r}")
         print("\n[yellow]Note: Generation skipped due to --recommend-only flag.[/yellow]")
         return
@@ -78,8 +78,8 @@ def generate(
 
     report_path = None
     if report_file and not report_format:
-        if not output_json:
-            print("\n[bold yellow]Warning:[/bold yellow] --report-file ignored: --report-format not set.")
+        import sys
+        print("Warning: --report-file ignored: --report-format not set.", file=sys.stderr)
     if report_format:
         from agent.core.reporter import Reporter
         try:
@@ -95,7 +95,7 @@ def generate(
             "test_type": result["test_type"],
             "framework": result["framework"],
             "output_file": result["output_file"],
-            "reasoning": result["reason"],
+            "reasoning": result["reasoning"],
             "execution": result.get("execution"),
             **({"report_file": report_path} if report_path is not None else {}),
         }, indent=2))
@@ -107,7 +107,7 @@ def generate(
     print(f"[bold]Framework:[/bold] {result['framework']}")
 
     print("\n[bold]Reasoning:[/bold]")
-    for r in result["reason"]:
+    for r in result["reasoning"]:
         print(f" - {r}")
 
     print("\n[bold yellow]Output File:[/bold yellow]")

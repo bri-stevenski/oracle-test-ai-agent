@@ -112,7 +112,7 @@ class Reporter:
             "properties": {
                 "framework": framework,
                 "test_type": test_type,
-                "reasoning": result.get("reason", []),
+                "reasoning": result.get("reasoning", []),
             },
         })
 

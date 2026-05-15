@@ -11,12 +11,16 @@ from pathlib import Path
 from datetime import datetime
 
 from rich import print
+from rich.console import Console
 from agent.core.classifier import TestClassifier
 from agent.core.domain_scanner import DomainScanner
 from agent.core.metadata_scanner import MetadataScanner
 from agent.core.pattern_matcher import PatternMatcher
 from agent.core.recommender import FrameworkRecommender
 from agent.llm import generate_response
+
+
+_err = Console(stderr=True)
 
 
 class OracleOrchestrator:
@@ -104,7 +108,7 @@ class OracleOrchestrator:
             "input": user_prompt,
             "test_type": classification.test_type,
             "framework": framework,
-            "reason": recommendation["reason"],
+            "reasoning": recommendation["reason"],
             "output_file": str(file_path)
         }
 
@@ -122,7 +126,7 @@ class OracleOrchestrator:
 
             # Self-healing loop (MVP: 1 attempt)
             if exit_code != 0:
-                print(f"\n[yellow]⚠️ Test failed (Exit {exit_code}). Oracle attempting to self-heal...[/yellow]")
+                _err.print(f"\n[yellow]⚠️ Test failed (Exit {exit_code}). Oracle attempting to self-heal...[/yellow]")
                 
                 fixed_code = self._attempt_fix(
                     user_prompt, 
@@ -142,7 +146,7 @@ class OracleOrchestrator:
                     "exit_code": exit_code_fixed,
                     "stdout": stdout_fixed,
                     "stderr": stderr_fixed,
-                    "fixed": True,
+                    "fixed": exit_code_fixed == 0,
                     "original_error": stderr or stdout
                 }
 
