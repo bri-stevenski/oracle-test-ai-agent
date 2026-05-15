@@ -124,7 +124,7 @@ updated: 2026-05-13
 
 ### Metadata Scanning
 
-- **Status:** planned
+- **Status:** done
 - **Spec:** none
 - **Summary:** TICKET-029 — detect local `package.json`, `tsconfig.json`,
   `requirements.txt` and align generation with project-specific library
