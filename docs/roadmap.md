@@ -190,10 +190,16 @@ updated: 2026-05-13
 
 ### Multi-step Debugging
 
-- **Status:** planned
+- **Status:** done
 - **Spec:** none
-- **Summary:** TICKET-035 — iterative debugging across multiple fix
-  attempts; search local code/docs to resolve complex failures.
+- **Summary:** TICKET-035 — replaces MVP single-retry with configurable
+  multi-step heal loop (default 3 attempts, `max_heal_attempts` ctor
+  param). Each attempt runs `_search_error_context()` — extracts
+  identifiers from the error message and greps project source files for
+  their definitions, injecting relevant snippets into the fix prompt.
+  Result dict gains `attempts` count. `fixed` only True when retry
+  actually passes. 15 orchestrator tests cover exhaustion, multi-step
+  success, zero-attempts disable, context search caps and filtering.
 - **Blockers:** none
 - **Plan:** none
 

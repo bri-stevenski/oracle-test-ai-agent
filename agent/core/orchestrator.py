@@ -22,6 +22,14 @@ from agent.llm import generate_response
 
 _err = Console(stderr=True)
 
+_MAX_HEAL_ATTEMPTS = 3
+_CONTEXT_SEARCH_FILES = 20
+_CONTEXT_SNIPPETS = 5
+_IGNORED_DIRS = {
+    "node_modules", ".git", "__pycache__", ".venv", "venv",
+    "dist", "build", "tests", "test", "__tests__",
+}
+
 
 class OracleOrchestrator:
     """
@@ -31,15 +39,13 @@ class OracleOrchestrator:
     natural language prompt into a functional, validated test file.
     """
 
-    def __init__(self):
-        """
-        Initializes the orchestrator with required sub-components.
-        """
+    def __init__(self, max_heal_attempts: int = _MAX_HEAL_ATTEMPTS):
         self.classifier = TestClassifier()
         self.recommender = FrameworkRecommender()
         self.metadata_scanner = MetadataScanner()
         self.pattern_matcher = PatternMatcher()
         self.domain_scanner = DomainScanner()
+        self.max_heal_attempts = max_heal_attempts
 
         self.output_dir = Path(__file__).resolve().parents[2] / "tests" / "generated"
         self.output_dir.mkdir(parents=True, exist_ok=True)
@@ -116,57 +122,48 @@ class OracleOrchestrator:
         if execute:
             executor = TestExecutor()
             exit_code, stdout, stderr = executor.execute(file_path, framework)
-            
+
+            original_error = stderr or stdout
+            current_code = generated_code
+            attempts = 0
+
+            while exit_code != 0 and attempts < self.max_heal_attempts:
+                attempts += 1
+                _err.print(
+                    f"\n[yellow]⚠️  Test failed (exit {exit_code}). "
+                    f"Self-heal attempt {attempts}/{self.max_heal_attempts}...[/yellow]"
+                )
+                error_context = self._search_error_context(stderr or stdout)
+                fixed_code = self._attempt_fix(
+                    user_prompt, framework, current_code, stderr or stdout, error_context
+                )
+                with open(file_path, "w") as f:
+                    f.write(fixed_code)
+                exit_code, stdout, stderr = executor.execute(file_path, framework)
+                current_code = fixed_code
+
             result["execution"] = {
                 "exit_code": exit_code,
                 "stdout": stdout,
                 "stderr": stderr,
-                "fixed": False
+                "fixed": exit_code == 0 and attempts > 0,
+                "attempts": attempts,
+                "original_error": original_error,
             }
-
-            # Self-healing loop (MVP: 1 attempt)
-            if exit_code != 0:
-                _err.print(f"\n[yellow]⚠️ Test failed (Exit {exit_code}). Oracle attempting to self-heal...[/yellow]")
-                
-                fixed_code = self._attempt_fix(
-                    user_prompt, 
-                    framework, 
-                    generated_code, 
-                    stderr or stdout
-                )
-                
-                # Overwrite file with fixed code
-                with open(file_path, "w") as f:
-                    f.write(fixed_code)
-                
-                # Re-execute
-                exit_code_fixed, stdout_fixed, stderr_fixed = executor.execute(file_path, framework)
-                
-                result["execution"] = {
-                    "exit_code": exit_code_fixed,
-                    "stdout": stdout_fixed,
-                    "stderr": stderr_fixed,
-                    "fixed": exit_code_fixed == 0,
-                    "original_error": stderr or stdout
-                }
 
         return result
 
-    def _attempt_fix(self, user_prompt: str, framework: str, original_code: str, error: str) -> str:
-        """
-        Requests a code fix from the LLM based on execution errors.
-
-        Args:
-            user_prompt: The original test requirement.
-            framework: The framework being used.
-            original_code: The failing code implementation.
-            error: The error output from the failed execution.
-
-        Returns:
-            The fixed code implementation as a string.
-        """
-        fix_prompt = f"""
-You are Oracle, a senior test automation engineer. 
+    def _attempt_fix(
+        self,
+        user_prompt: str,
+        framework: str,
+        original_code: str,
+        error: str,
+        context: str = "",
+    ) -> str:
+        """Request a code fix from the LLM, optionally enriched with local project context."""
+        context_section = f"\n--- LOCAL PROJECT CONTEXT ---\n{context}\n" if context else ""
+        fix_prompt = f"""You are Oracle, a senior test automation engineer.
 A test you generated for the following requirement has FAILED.
 
 --- REQUIREMENT ---
@@ -177,15 +174,79 @@ A test you generated for the following requirement has FAILED.
 
 --- ERROR OUTPUT ---
 {error}
-
+{context_section}
 --- TASK ---
-Fix the code so it passes. 
+Fix the code so it passes.
 - Maintain all original test logic
 - Address the specific error provided
 - Ensure the result is a complete, runnable file
 - Return ONLY the code, no explanation
 """
         return generate_response(fix_prompt)
+
+    def _search_error_context(self, error: str, project_root: str = ".") -> str:
+        """Grep project source files for symbols referenced in the error message.
+
+        Extracts identifiers from the error text (quoted names, dotted paths, file
+        references) and returns up to _CONTEXT_SNIPPETS definition snippets so the
+        LLM fix prompt has real project code to reason about.
+        """
+        import re
+
+        root = Path(project_root).resolve()
+        candidates: set = set()
+
+        # Quoted identifiers: 'Foo', "bar.baz"
+        for m in re.finditer(r"""['"]([A-Za-z_]\w*(?:\.\w+)*)['"]""", error):
+            candidates.add(m.group(1).split(".")[0])
+
+        # "name 'foo' is not defined", "module 'x'", "attribute 'y'"
+        for m in re.finditer(
+            r"\b(?:name|module|attribute|class|function)\s+['\"]?(\w+)", error, re.IGNORECASE
+        ):
+            candidates.add(m.group(1))
+
+        # File references: something.py:42
+        for m in re.finditer(r"(\w+)\.(?:py|ts|js):\d+", error):
+            candidates.add(m.group(1))
+
+        if not candidates:
+            return ""
+
+        snippets: list = []
+        seen_entries: set = set()
+        source_globs = ["**/*.py", "**/*.ts", "**/*.tsx", "**/*.js"]
+
+        for glob_pattern in source_globs:
+            for path in sorted(root.glob(glob_pattern)):
+                if any(part in _IGNORED_DIRS for part in path.parts):
+                    continue
+                try:
+                    text = path.read_text(encoding="utf-8", errors="ignore")
+                except OSError:
+                    continue
+                lines = text.splitlines()
+                for candidate in candidates:
+                    for i, line in enumerate(lines):
+                        if candidate in line and any(
+                            kw in line
+                            for kw in ("def ", "class ", "export ", "function ", "const ", "import ")
+                        ):
+                            start = max(0, i - 1)
+                            end = min(len(lines), i + 8)
+                            entry = f"# {path.name}:{i + 1}\n" + "\n".join(lines[start:end])
+                            if entry not in seen_entries:
+                                seen_entries.add(entry)
+                                snippets.append(entry)
+                            break
+                if len(snippets) >= _CONTEXT_SNIPPETS:
+                    break
+            if len(snippets) >= _CONTEXT_SNIPPETS:
+                break
+
+        if not snippets:
+            return ""
+        return "\n\n".join(snippets[:_CONTEXT_SNIPPETS])
 
     def _build_prompt(self, user_prompt: str, test_type: str, framework: str, metadata=None, patterns=None, domain=None) -> str:
         """
