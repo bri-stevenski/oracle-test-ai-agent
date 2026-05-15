@@ -45,7 +45,7 @@ with unit tests that mock the underlying SDK.
 
 ## File Map
 
-```
+```text
 CREATE agent/llm/providers/codex.py
 MODIFY agent/llm/factory.py
 MODIFY tests/unit/test_factory.py
