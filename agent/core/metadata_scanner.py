@@ -59,8 +59,12 @@ class MetadataScanner:
         try:
             pkg = json.loads(path.read_text(encoding="utf-8"))
             deps: Dict[str, str] = {}
-            deps.update(pkg.get("dependencies", {}))
-            deps.update(pkg.get("devDependencies", {}))
+            raw_deps = pkg.get("dependencies") or {}
+            raw_dev = pkg.get("devDependencies") or {}
+            if isinstance(raw_deps, dict):
+                deps.update(raw_deps)
+            if isinstance(raw_dev, dict):
+                deps.update(raw_dev)
             metadata.js_dependencies = deps
         except (json.JSONDecodeError, OSError):
             pass
@@ -112,11 +116,19 @@ class MetadataScanner:
         return packages
 
     def _parse_pyproject_deps(self, text: str) -> Dict[str, str]:
-        # Extract the dependencies array from the [project] section.
-        match = re.search(
-            r"\[project\].*?^dependencies\s*=\s*\[(.*?)\]",
+        # Isolate the [project] section first, stopping at the next section
+        # header, so we never read dependencies from [tool.*] or other sections.
+        section = re.search(
+            r"^\[project\]$(.*?)(?=^\[|\Z)",
             text,
-            re.DOTALL | re.MULTILINE,
+            re.MULTILINE | re.DOTALL,
+        )
+        if not section:
+            return {}
+        match = re.search(
+            r"^dependencies\s*=\s*\[(.*?)\]",
+            section.group(1),
+            re.MULTILINE | re.DOTALL,
         )
         if not match:
             return {}

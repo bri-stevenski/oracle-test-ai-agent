@@ -61,6 +61,12 @@ class TestScanPackageJson(unittest.TestCase):
         metadata = self.scanner.scan(str(self.root))
         self.assertEqual(metadata.js_dependencies, {})
 
+    def test_null_dependencies_field_leaves_empty(self):
+        pkg = {"dependencies": None, "devDependencies": None}
+        (self.root / "package.json").write_text(json.dumps(pkg))
+        metadata = self.scanner.scan(str(self.root))
+        self.assertEqual(metadata.js_dependencies, {})
+
 
 class TestScanRequirementsTxt(unittest.TestCase):
 
@@ -126,6 +132,15 @@ class TestScanPyprojectToml(unittest.TestCase):
 
     def test_no_dependencies_key_returns_empty(self):
         toml = '[project]\nname = "myapp"\n'
+        (self.root / "pyproject.toml").write_text(toml)
+        metadata = self.scanner.scan(str(self.root))
+        self.assertEqual(metadata.python_packages, {})
+
+    def test_does_not_cross_section_boundaries(self):
+        toml = (
+            '[project]\nname = "myapp"\n\n'
+            '[tool.other]\ndependencies = [\n    "something>=1.0",\n]\n'
+        )
         (self.root / "pyproject.toml").write_text(toml)
         metadata = self.scanner.scan(str(self.root))
         self.assertEqual(metadata.python_packages, {})
