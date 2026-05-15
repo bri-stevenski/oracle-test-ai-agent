@@ -161,3 +161,79 @@ class TestGeminiProviderGenerate(unittest.TestCase):
             GeminiProvider().generate(
                 [{"role": "user", "content": "x"}]
             )
+
+
+def _mock_openai_client(MockOpenAI: MagicMock, text: str) -> MagicMock:
+    """Wire MockOpenAI to return `text` from chat completions."""
+    mock_client = MagicMock()
+    MockOpenAI.return_value = mock_client
+    choice = MagicMock()
+    choice.message.content = text
+    resp = MagicMock()
+    resp.choices = [choice]
+    mock_client.chat.completions.create.return_value = resp
+    return mock_client
+
+
+class TestOpenAIProviderGenerate(unittest.TestCase):
+
+    def setUp(self):
+        os.environ["OPENAI_API_KEY"] = "test-key"
+
+    def tearDown(self):
+        os.environ.pop("OPENAI_API_KEY", None)
+
+    @patch("agent.llm.providers.openai.OpenAI")
+    def test_generate_returns_content(self, MockOpenAI):
+        _mock_openai_client(MockOpenAI, "openai output")
+        from agent.llm.providers.openai import OpenAIProvider
+        result = OpenAIProvider().generate(
+            [{"role": "user", "content": "write a test"}]
+        )
+        self.assertEqual(result, "openai output")
+
+    @patch("agent.llm.providers.openai.OpenAI")
+    def test_generate_raises_on_empty_choices(self, MockOpenAI):
+        mock_client = MagicMock()
+        MockOpenAI.return_value = mock_client
+        resp = MagicMock()
+        resp.choices = []
+        mock_client.chat.completions.create.return_value = resp
+
+        from agent.llm.providers.openai import OpenAIProvider
+        with self.assertRaises(RuntimeError):
+            OpenAIProvider().generate(
+                [{"role": "user", "content": "x"}]
+            )
+
+
+class TestCodexProviderGenerate(unittest.TestCase):
+
+    def setUp(self):
+        os.environ["OPENAI_API_KEY"] = "test-key"
+
+    def tearDown(self):
+        os.environ.pop("OPENAI_API_KEY", None)
+
+    @patch("openai.OpenAI")
+    def test_generate_returns_content(self, MockOpenAI):
+        _mock_openai_client(MockOpenAI, "codex output")
+        from agent.llm.providers.codex import CodexProvider
+        result = CodexProvider().generate(
+            [{"role": "user", "content": "write a test"}]
+        )
+        self.assertEqual(result, "codex output")
+
+    @patch("openai.OpenAI")
+    def test_generate_raises_on_empty_choices(self, MockOpenAI):
+        mock_client = MagicMock()
+        MockOpenAI.return_value = mock_client
+        resp = MagicMock()
+        resp.choices = []
+        mock_client.chat.completions.create.return_value = resp
+
+        from agent.llm.providers.codex import CodexProvider
+        with self.assertRaises(RuntimeError):
+            CodexProvider().generate(
+                [{"role": "user", "content": "x"}]
+            )
