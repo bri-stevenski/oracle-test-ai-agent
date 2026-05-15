@@ -1,4 +1,5 @@
 # Runtime artifacts (generated, ephemeral, session-scoped)
+knowledge/
 analyses/
 graph/
 debug/
