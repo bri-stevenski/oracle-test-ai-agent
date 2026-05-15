@@ -92,9 +92,22 @@ updated: 2026-05-11
 
 ## Provider Platform
 
+### Gemini SDK Migration
+
+- **Status:** planned
+- **Spec:** none
+- **Summary:** Migrate `GeminiProvider` from the deprecated
+  `google-generativeai` package to `google.genai`. Google has ended
+  support for `google-generativeai`; it will no longer receive updates
+  or bug fixes. Update `pyproject.toml` to replace the dependency and
+  adjust `agent/llm/providers/gemini.py` and its tests to use the new
+  SDK's API surface.
+- **Blockers:** none
+- **Plan:** none
+
 ### Multi-Provider LLM Support
 
-- **Status:** in-progress
+- **Status:** done
 - **Spec:** none
 - **Summary:** Bring Oracle's LLM provider matrix to parity with the
   harness toolchain. Add first-class providers for Claude (Anthropic)
