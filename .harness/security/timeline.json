@@ -176,6 +176,37 @@
       },
       "suppressionCount": 0,
       "findingIds": []
+    },
+    {
+      "capturedAt": "2026-05-15T23:08:15.245Z",
+      "commitHash": "fbf26fe2bc12099ddca22d605163ae364535e5e2",
+      "securityScore": 100,
+      "totalFindings": 1,
+      "bySeverity": {
+        "error": 0,
+        "warning": 0,
+        "info": 1
+      },
+      "byCategory": {
+        "network": {
+          "findingCount": 1,
+          "errorCount": 0,
+          "warningCount": 0,
+          "infoCount": 1
+        }
+      },
+      "supplyChain": {
+        "critical": 0,
+        "high": 0,
+        "moderate": 0,
+        "low": 0,
+        "info": 0,
+        "total": 0
+      },
+      "suppressionCount": 0,
+      "findingIds": [
+        "f648dc252b6f0cc1"
+      ]
     }
   ],
   "findingLifecycles": [
@@ -200,6 +231,17 @@
       "firstSeenCommit": "241d1b30d01bf03394ea11147cc003f831eb2b4d",
       "resolvedAt": "2026-05-11T07:51:47.940Z",
       "resolvedCommit": "241d1b30d01bf03394ea11147cc003f831eb2b4d"
+    },
+    {
+      "findingId": "f648dc252b6f0cc1",
+      "ruleId": "SEC-NET-003",
+      "category": "network",
+      "severity": "info",
+      "file": "tests/unit/test_ci_env.py",
+      "firstSeenAt": "2026-05-15T23:08:15.248Z",
+      "firstSeenCommit": "fbf26fe2bc12099ddca22d605163ae364535e5e2",
+      "resolvedAt": null,
+      "resolvedCommit": null
     }
   ]
 }
