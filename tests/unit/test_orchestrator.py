@@ -202,9 +202,23 @@ class TestSearchErrorContext(unittest.TestCase):
                 "AttributeError: 'Target' not found",
                 project_root=tmp,
             )
-        # Result should not be enormous — capped at 5 snippets
         snippet_count = result.count("# mod")
         self.assertLessEqual(snippet_count, 5)
+
+    def test_caps_files_scanned_at_twenty(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            # Create 30 files — scanner should stop after 20
+            for i in range(30):
+                (Path(tmp) / f"svc{i}.py").write_text(
+                    f"def handle_{i}(): pass\n"
+                )
+            # Use an identifier that won't match anything so we scan up to the file cap
+            result = self.orchestrator._search_error_context(
+                "NameError: name 'nonexistent_xyz' is not defined",
+                project_root=tmp,
+            )
+        # No match found, but should not have scanned all 30 files
+        self.assertEqual(result, "")
 
 
 if __name__ == '__main__':

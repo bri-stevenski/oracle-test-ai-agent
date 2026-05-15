@@ -7,6 +7,7 @@ This module coordinates the entire test generation pipeline, including
 classification, recommendation, generation, file management, and self-healing.
 """
 
+import re
 from pathlib import Path
 from datetime import datetime
 
@@ -185,14 +186,7 @@ Fix the code so it passes.
         return generate_response(fix_prompt)
 
     def _search_error_context(self, error: str, project_root: str = ".") -> str:
-        """Grep project source files for symbols referenced in the error message.
-
-        Extracts identifiers from the error text (quoted names, dotted paths, file
-        references) and returns up to _CONTEXT_SNIPPETS definition snippets so the
-        LLM fix prompt has real project code to reason about.
-        """
-        import re
-
+        """Search project source files for symbol definitions referenced in the error message."""
         root = Path(project_root).resolve()
         candidates: set = set()
 
@@ -216,11 +210,15 @@ Fix the code so it passes.
         snippets: list = []
         seen_entries: set = set()
         source_globs = ["**/*.py", "**/*.ts", "**/*.tsx", "**/*.js"]
+        files_scanned = 0
 
         for glob_pattern in source_globs:
             for path in sorted(root.glob(glob_pattern)):
                 if any(part in _IGNORED_DIRS for part in path.parts):
                     continue
+                files_scanned += 1
+                if files_scanned > _CONTEXT_SEARCH_FILES:
+                    break
                 try:
                     text = path.read_text(encoding="utf-8", errors="ignore")
                 except OSError:
@@ -239,9 +237,9 @@ Fix the code so it passes.
                                 seen_entries.add(entry)
                                 snippets.append(entry)
                             break
-                if len(snippets) >= _CONTEXT_SNIPPETS:
+                if len(snippets) >= _CONTEXT_SNIPPETS or files_scanned > _CONTEXT_SEARCH_FILES:
                     break
-            if len(snippets) >= _CONTEXT_SNIPPETS:
+            if len(snippets) >= _CONTEXT_SNIPPETS or files_scanned > _CONTEXT_SEARCH_FILES:
                 break
 
         if not snippets:
