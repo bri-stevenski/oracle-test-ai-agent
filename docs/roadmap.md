@@ -154,7 +154,7 @@ updated: 2026-05-13
 
 ### GitHub Action
 
-- **Status:** planned
+- **Status:** done
 - **Spec:** none
 - **Summary:** TICKET-032 — official Oracle GitHub Action that
   auto-generates tests for new features/bug fixes on PR.

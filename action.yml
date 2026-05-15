@@ -1,0 +1,161 @@
+name: 'Oracle Test Generator'
+description: 'Auto-generate tests for new features and bug fixes on pull requests using AI'
+author: 'bri-stevenski'
+
+branding:
+  icon: 'zap'
+  color: 'purple'
+
+inputs:
+  api-key:
+    description: 'API key for the configured LLM provider (ANTHROPIC_API_KEY, OPENAI_API_KEY, or GEMINI_API_KEY)'
+    required: true
+  provider:
+    description: 'LLM provider to use: claude (default), openai, gemini, mock'
+    required: false
+    default: 'claude'
+  prompt:
+    description: 'Custom generation prompt. If omitted, auto-derived from changed source files in the PR.'
+    required: false
+    default: ''
+  run-tests:
+    description: 'Execute the generated tests after generation (requires the test framework to be installed)'
+    required: false
+    default: 'false'
+  comment:
+    description: 'Post a PR comment with the generation summary and test preview'
+    required: false
+    default: 'true'
+  python-version:
+    description: 'Python version to use when installing Oracle'
+    required: false
+    default: '3.11'
+
+outputs:
+  output-file:
+    description: 'Path to the generated test file'
+    value: ${{ steps.generate.outputs.output-file }}
+  test-type:
+    description: 'Classified test type (e2e_ui, api, frontend_unit, performance, python_unit)'
+    value: ${{ steps.generate.outputs.test-type }}
+  framework:
+    description: 'Recommended test framework (playwright, pytest, vitest, k6)'
+    value: ${{ steps.generate.outputs.framework }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python-version }}
+        cache: 'pip'
+
+    - name: Install Oracle
+      shell: bash
+      run: |
+        pip install --quiet "${GITHUB_ACTION_PATH}"
+
+    - name: Detect changed source files
+      id: changed
+      shell: bash
+      run: |
+        BASE="${{ github.event.pull_request.base.sha }}"
+        HEAD="${{ github.sha }}"
+        if [ -z "$BASE" ]; then
+          # Not a PR context — skip file detection
+          echo "files=" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+        FILES=$(git diff --name-only "$BASE" "$HEAD" \
+          | grep -E '\.(py|ts|tsx|js|jsx)$' \
+          | grep -vE '(^|/)test_|_test\.(py|ts|js)$|\.spec\.(ts|js)|\.test\.(ts|js)' \
+          | head -10 \
+          | tr '\n' ' ')
+        echo "files=${FILES}" >> "$GITHUB_OUTPUT"
+
+    - name: Build generation prompt
+      id: prompt
+      shell: bash
+      env:
+        PROMPT_INPUT: ${{ inputs.prompt }}
+        FILES_INPUT: ${{ steps.changed.outputs.files }}
+      run: |
+        CUSTOM="${PROMPT_INPUT}"
+        FILES="${FILES_INPUT}"
+        if [ -n "$CUSTOM" ]; then
+          PROMPT="$CUSTOM"
+        elif [ -n "$FILES" ]; then
+          PROMPT="Generate tests for the following changed files in this pull request: $FILES"
+        else
+          PROMPT="Generate tests for the changes in this pull request"
+        fi
+        # Write to a temp file to avoid shell quoting issues in GITHUB_OUTPUT
+        echo "$PROMPT" > /tmp/oracle_prompt.txt
+        echo "prompt-file=/tmp/oracle_prompt.txt" >> "$GITHUB_OUTPUT"
+
+    - name: Generate tests
+      id: generate
+      shell: bash
+      env:
+        ORACLE_LLM_PROVIDER: ${{ inputs.provider }}
+        ANTHROPIC_API_KEY: ${{ inputs.api-key }}
+        OPENAI_API_KEY: ${{ inputs.api-key }}
+        GEMINI_API_KEY: ${{ inputs.api-key }}
+      run: |
+        PROMPT=$(cat "${{ steps.prompt.outputs.prompt-file }}")
+        RUN_FLAG=""
+        if [ "${{ inputs.run-tests }}" = "true" ]; then
+          RUN_FLAG="--run"
+        fi
+        RESULT=$(oracle generate "$PROMPT" --json $RUN_FLAG 2>/dev/null)
+        OUTPUT_FILE=$(echo "$RESULT" | python3 -c \
+          "import sys,json; d=json.loads(sys.stdin.read()); print(d.get('output_file',''))" 2>/dev/null || echo "")
+        TEST_TYPE=$(echo "$RESULT" | python3 -c \
+          "import sys,json; d=json.loads(sys.stdin.read()); print(d.get('test_type',''))" 2>/dev/null || echo "")
+        FRAMEWORK=$(echo "$RESULT" | python3 -c \
+          "import sys,json; d=json.loads(sys.stdin.read()); print(d.get('framework',''))" 2>/dev/null || echo "")
+        echo "output-file=${OUTPUT_FILE}" >> "$GITHUB_OUTPUT"
+        echo "test-type=${TEST_TYPE}" >> "$GITHUB_OUTPUT"
+        echo "framework=${FRAMEWORK}" >> "$GITHUB_OUTPUT"
+        # Persist result JSON for the comment step
+        echo "$RESULT" > /tmp/oracle_result.json
+
+    - name: Post PR comment
+      if: inputs.comment == 'true' && github.event_name == 'pull_request'
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        OUTPUT_FILE="${{ steps.generate.outputs.output-file }}"
+        TEST_TYPE="${{ steps.generate.outputs.test-type }}"
+        FRAMEWORK="${{ steps.generate.outputs.framework }}"
+
+        if [ -n "$OUTPUT_FILE" ] && [ -f "$OUTPUT_FILE" ]; then
+          TEST_CONTENT=$(cat "$OUTPUT_FILE")
+          PREVIEW="<details>
+        <summary>View generated test</summary>
+
+        \`\`\`${FRAMEWORK}
+        ${TEST_CONTENT}
+        \`\`\`
+
+        </details>"
+        else
+          PREVIEW="*Test file not available — generation may have failed. Check the workflow logs.*"
+        fi
+
+        gh pr comment "${{ github.event.pull_request.number }}" \
+          --repo "${{ github.repository }}" \
+          --body "## Oracle Test Generation
+
+        | | |
+        |---|---|
+        | **Test type** | \`${TEST_TYPE}\` |
+        | **Framework** | \`${FRAMEWORK}\` |
+        | **Output** | \`${OUTPUT_FILE}\` |
+
+        ${PREVIEW}
+
+        ---
+        *Generated by [Oracle](https://github.com/bri-stevenski/oracle-test-ai-agent)*" || true

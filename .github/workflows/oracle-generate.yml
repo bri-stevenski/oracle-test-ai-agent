@@ -1,0 +1,35 @@
+name: Oracle Test Generation
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: oracle-generate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  generate:
+    name: Generate tests for changed files
+    runs-on: ubuntu-latest
+    # Skip on dependabot PRs and forks without access to secrets
+    if: github.actor != 'dependabot[bot]'
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate tests with Oracle
+        uses: ./
+        with:
+          # Use the mock provider in CI — no API key required.
+          # To use a real provider, set ANTHROPIC_API_KEY (or equivalent)
+          # in your repo secrets and change provider to 'claude'.
+          provider: mock
+          api-key: mock
+          comment: ${{ github.event_name == 'pull_request' }}
