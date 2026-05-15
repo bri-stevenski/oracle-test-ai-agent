@@ -12,6 +12,7 @@ from datetime import datetime
 
 from rich import print
 from agent.core.classifier import TestClassifier
+from agent.core.metadata_scanner import MetadataScanner
 from agent.core.recommender import FrameworkRecommender
 from agent.llm import generate_response
 
@@ -30,6 +31,7 @@ class OracleOrchestrator:
         """
         self.classifier = TestClassifier()
         self.recommender = FrameworkRecommender()
+        self.metadata_scanner = MetadataScanner()
 
         self.output_dir = Path(__file__).resolve().parents[2] / "tests" / "generated"
         self.output_dir.mkdir(parents=True, exist_ok=True)
@@ -49,10 +51,13 @@ class OracleOrchestrator:
         """
         from agent.core.executor import TestExecutor
 
-        # 1. Classify intent
+        # 1. Scan project metadata from cwd
+        metadata = self.metadata_scanner.scan()
+
+        # 2. Classify intent
         classification = self.classifier.classify(user_prompt)
 
-        # 2. Recommend framework
+        # 3. Recommend framework
         recommendation = self.recommender.recommend(classification)
 
         framework = recommendation["framework"]
@@ -66,17 +71,18 @@ class OracleOrchestrator:
         raw_ext = recommendation.get("file_extension", "ts")
         extension = self._sanitize_extension(raw_ext)
 
-        # 3. Build generation prompt
+        # 4. Build generation prompt
         generation_prompt = self._build_prompt(
             user_prompt,
             classification.test_type,
-            framework
+            framework,
+            metadata,
         )
 
-        # 4. Generate test code
+        # 5. Generate test code
         generated_code = generate_response(generation_prompt)
 
-        # 5. Write file
+        # 6. Write file
         file_path = self._write_test_file(generated_code, framework, extension)
 
         result = {
@@ -87,7 +93,7 @@ class OracleOrchestrator:
             "output_file": str(file_path)
         }
 
-        # 6. Execute if requested
+        # 7. Execute if requested
         if execute:
             executor = TestExecutor()
             exit_code, stdout, stderr = executor.execute(file_path, framework)
@@ -162,7 +168,7 @@ Fix the code so it passes.
 """
         return generate_response(fix_prompt)
 
-    def _build_prompt(self, user_prompt: str, test_type: str, framework: str) -> str:
+    def _build_prompt(self, user_prompt: str, test_type: str, framework: str, metadata=None) -> str:
         """
         Constructs the framework-aware prompt for the LLM.
 
@@ -170,10 +176,38 @@ Fix the code so it passes.
             user_prompt: The user's requirement.
             test_type: The classified test type (e.g., e2e_ui).
             framework: The recommended framework (e.g., playwright).
+            metadata: Optional ProjectMetadata from the scanner.
 
         Returns:
             A formatted prompt string for the LLM.
         """
+        context_lines = [
+            f"Test Type: {test_type}",
+            f"Framework: {framework}",
+        ]
+
+        if metadata and not metadata.is_empty:
+            if metadata.js_dependencies:
+                deps_str = ", ".join(
+                    f"{k}@{v.lstrip('>=~^')}" if v else k
+                    for k, v in sorted(metadata.js_dependencies.items())
+                )
+                context_lines.append(f"JS dependencies: {deps_str}")
+            if metadata.python_packages:
+                pkgs_str = ", ".join(
+                    f"{k}{v}" if v else k
+                    for k, v in sorted(metadata.python_packages.items())
+                )
+                context_lines.append(f"Python packages: {pkgs_str}")
+            if metadata.tsconfig:
+                highlights = {
+                    k: v for k, v in metadata.tsconfig.items()
+                    if k in ("target", "module", "strict", "jsx")
+                }
+                if highlights:
+                    context_lines.append(f"TypeScript config: {highlights}")
+
+        context = "\n".join(context_lines)
 
         return f"""
 You are Oracle, a senior test automation engineer.
@@ -184,8 +218,7 @@ Generate high-quality {framework} tests for the following requirement:
 {user_prompt}
 
 --- CONTEXT ---
-Test Type: {test_type}
-Framework: {framework}
+{context}
 
 --- RULES ---
 - Follow best practices for {framework}
@@ -193,6 +226,7 @@ Framework: {framework}
 - Avoid brittle selectors
 - Include comments explaining key logic
 - Ensure code is production-ready
+- Use the exact library versions detected in the project where relevant
 """
 
     def _write_test_file(self, code: str, framework: str, extension: str) -> Path:
