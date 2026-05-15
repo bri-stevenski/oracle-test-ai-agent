@@ -73,6 +73,9 @@ def generate(
     result = orchestrator.run(prompt, execute=run_test)
 
     report_path = None
+    if report_file and not report_format:
+        if not output_json:
+            print("\n[bold yellow]Warning:[/bold yellow] --report-file ignored: --report-format not set.")
     if report_format:
         from agent.core.reporter import Reporter
         try:
@@ -90,7 +93,7 @@ def generate(
             "output_file": result["output_file"],
             "reasoning": result["reason"],
             "execution": result.get("execution"),
-            "report_file": report_path,
+            **({"report_file": report_path} if report_path is not None else {}),
         }, indent=2))
         return
 

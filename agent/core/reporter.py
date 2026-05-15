@@ -18,7 +18,7 @@ _TOOL_NAME = "Oracle"
 _TOOL_VERSION = "0.1.0"
 _TOOL_URI = "https://github.com/bri-stevenski/oracle-test-ai-agent"
 
-_RULES = [
+_RULES = (
     {
         "id": "oracle/test-generation",
         "name": "TestGeneration",
@@ -31,7 +31,7 @@ _RULES = [
         "shortDescription": {"text": "Automated test execution result"},
         "helpUri": _TOOL_URI,
     },
-]
+)
 
 SUPPORTED_FORMATS = ("json", "sarif")
 
@@ -40,21 +40,7 @@ class Reporter:
     """Converts Oracle pipeline results into standardized report formats."""
 
     def write(self, result: dict, fmt: str, output_path: Optional[str] = None) -> Path:
-        """
-        Serialize result to the given format and write to disk.
-
-        Args:
-            result: The dict returned by OracleOrchestrator.run().
-            fmt:    Output format — 'json' or 'sarif'.
-            output_path: Destination file path. Defaults to
-                         oracle-report.json or oracle-report.sarif.
-
-        Returns:
-            The Path where the report was written.
-
-        Raises:
-            ValueError: If fmt is not a supported format.
-        """
+        """Serialize result to fmt ('json' or 'sarif') and write to disk; raises ValueError for unsupported formats."""
         if fmt not in SUPPORTED_FORMATS:
             raise ValueError(
                 f"Unsupported report format '{fmt}'. "
