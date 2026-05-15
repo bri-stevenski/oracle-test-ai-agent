@@ -12,7 +12,7 @@ _GENERATION_ONLY = {
     "output_file": "tests/test_auth.py",
     "test_type": "python_unit",
     "framework": "pytest",
-    "reason": ["Python source file detected", "Standard unit test"],
+    "reasoning": ["Python source file detected", "Standard unit test"],
 }
 
 _WITH_EXECUTION_PASS = {
