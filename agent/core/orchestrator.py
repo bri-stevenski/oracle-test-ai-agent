@@ -12,6 +12,7 @@ from datetime import datetime
 
 from rich import print
 from agent.core.classifier import TestClassifier
+from agent.core.domain_scanner import DomainScanner
 from agent.core.metadata_scanner import MetadataScanner
 from agent.core.pattern_matcher import PatternMatcher
 from agent.core.recommender import FrameworkRecommender
@@ -34,6 +35,7 @@ class OracleOrchestrator:
         self.recommender = FrameworkRecommender()
         self.metadata_scanner = MetadataScanner()
         self.pattern_matcher = PatternMatcher()
+        self.domain_scanner = DomainScanner()
 
         self.output_dir = Path(__file__).resolve().parents[2] / "tests" / "generated"
         self.output_dir.mkdir(parents=True, exist_ok=True)
@@ -79,19 +81,23 @@ class OracleOrchestrator:
             test_type=classification.test_type,
         )
 
-        # 5. Build generation prompt
+        # 5. Scan project domain knowledge
+        domain = self.domain_scanner.scan()
+
+        # 6. Build generation prompt
         generation_prompt = self._build_prompt(
             user_prompt,
             classification.test_type,
             framework,
             metadata,
             patterns,
+            domain,
         )
 
-        # 6. Generate test code
+        # 7. Generate test code
         generated_code = generate_response(generation_prompt)
 
-        # 7. Write file
+        # 8. Write file
         file_path = self._write_test_file(generated_code, framework, extension)
 
         result = {
@@ -102,7 +108,7 @@ class OracleOrchestrator:
             "output_file": str(file_path)
         }
 
-        # 8. Execute if requested
+        # 9. Execute if requested
         if execute:
             executor = TestExecutor()
             exit_code, stdout, stderr = executor.execute(file_path, framework)
@@ -177,7 +183,7 @@ Fix the code so it passes.
 """
         return generate_response(fix_prompt)
 
-    def _build_prompt(self, user_prompt: str, test_type: str, framework: str, metadata=None, patterns=None) -> str:
+    def _build_prompt(self, user_prompt: str, test_type: str, framework: str, metadata=None, patterns=None, domain=None) -> str:
         """
         Constructs the framework-aware prompt for the LLM.
 
@@ -187,6 +193,7 @@ Fix the code so it passes.
             framework: The recommended framework (e.g., playwright).
             metadata: Optional ProjectMetadata from the scanner.
             patterns: Optional PatternProfile from the pattern matcher.
+            domain: Optional DomainContext from the domain scanner.
 
         Returns:
             A formatted prompt string for the LLM.
@@ -227,6 +234,16 @@ Fix the code so it passes.
                 context_lines.append(f"Common imports: {', '.join(patterns.common_imports)}")
             if patterns.sample_names:
                 context_lines.append(f"Example test names: {', '.join(patterns.sample_names)}")
+
+        if domain and not domain.is_empty:
+            if domain.components:
+                context_lines.append(f"Available components/classes: {', '.join(domain.components)}")
+            if domain.functions:
+                context_lines.append(f"Public functions: {', '.join(domain.functions)}")
+            if domain.api_routes:
+                context_lines.append(f"API routes: {', '.join(domain.api_routes)}")
+            if domain.modules:
+                context_lines.append(f"Modules: {', '.join(domain.modules[:8])}")
 
         context = "\n".join(context_lines)
 

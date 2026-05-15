@@ -143,7 +143,7 @@ updated: 2026-05-13
 
 ### Recursive Domain Knowledge
 
-- **Status:** planned
+- **Status:** done
 - **Spec:** none
 - **Summary:** TICKET-031 — scan project directories to understand
   available components/APIs and inject domain context into prompts.
