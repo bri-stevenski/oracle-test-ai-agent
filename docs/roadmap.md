@@ -2,7 +2,7 @@
 project: oracle
 version: 1
 created: 2026-05-11
-updated: 2026-05-13
+updated: 2026-05-17
 ---
 
 # Roadmap
@@ -213,6 +213,19 @@ updated: 2026-05-13
 - **Plan:** none
 
 ## Developer Experience and Onboarding
+
+### Test Suite Maintenance
+
+- **Status:** done
+- **Spec:** none
+- **Summary:** PR #44 — renamed `TestExecutor` → `OracleTestExecutor` to
+  eliminate `PytestCollectionWarning` (pytest treats any `Test*` class with
+  `__init__` as a candidate test class). Installed missing `google-genai`
+  dependency that was declared in `pyproject.toml` but absent from the venv,
+  restoring 5 Gemini provider tests that had been failing silently. Result:
+  182/182 passing, 0 warnings.
+- **Blockers:** none
+- **Plan:** none
 
 ### IDE Plugins
 
