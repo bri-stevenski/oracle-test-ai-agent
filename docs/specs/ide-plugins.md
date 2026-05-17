@@ -23,13 +23,18 @@ works in a TypeScript-capable environment.
   oracle` or from source before installing the plugin. The plugin does not bundle
   or install the CLI.
 - **Oracle CLI version:** >= 0.1 (see CLI Resolution for behavior on older versions).
+- **macOS PATH:** VS Code on macOS launches without a login shell; child processes
+  do not inherit shell-managed PATH entries (pyenv, asdf, nvm, `~/.local/bin`).
+  Users whose `oracle` is installed via a shell version manager must set
+  `oracle.cliPath` explicitly. The plugin will probe `~/.local/bin` and
+  `/usr/local/bin` as fallbacks before entering the not-found state.
 
 ## User Stories
 
 | # | As a developer I want to… | So that… |
 |---|--------------------------|----------|
 | U1 | generate a test from a natural language description without leaving the editor | I don't break flow context switching to a terminal |
-| U2 | right-click a source file and generate a test for it | Oracle can pre-fill the prompt with the file name and detected component names |
+| U2 | right-click a source file and generate a test for it | Oracle can pre-fill the prompt with the file name |
 | U3 | run the currently open test file with one keystroke | I get immediate feedback without remembering the exact CLI flags |
 | U4 | scaffold a new test suite from the command palette | I don't have to look up `oracle init` syntax |
 | U5 | migrate a harness project from within the IDE | I can review what would change in the editor before applying |
@@ -46,7 +51,6 @@ All commands are registered in the Command Palette under the `Oracle:` prefix.
 | `oracle.run` | Oracle: Run Test | Palette, editor toolbar (`.spec.*`, `.test.*` files), keybinding |
 | `oracle.init` | Oracle: Init Framework | Palette |
 | `oracle.migrate` | Oracle: Migrate Harness Project | Palette |
-| `oracle.recommendOnly` | Oracle: Recommend Framework | Palette |
 | `oracle.openOutput` | Oracle: Show Output | Palette, status bar click |
 
 ### `oracle.generate` flow
@@ -68,8 +72,8 @@ All commands are registered in the Command Palette under the `Oracle:` prefix.
    `.spec.` or `.test.` in the name), prompt to select one.
 2. Prompt for framework if not auto-detectable from file extension or workspace
    config; otherwise infer silently.
-3. Run `oracle run "<file>" <framework> --json`.
-4. Stream stdout/stderr to the Oracle Output panel in real time.
+3. Run `oracle run "<file>" <framework>`.
+4. Append stdout/stderr to the Oracle Output panel on process exit.
 5. Show pass/fail in the status bar for 10 seconds after completion.
 
 ### `oracle.init` flow
@@ -83,12 +87,12 @@ All commands are registered in the Command Palette under the `Oracle:` prefix.
 1. If no workspace folder is open (`vscode.workspace.workspaceFolders` is
    undefined), show an error notification: "oracle migrate requires an open
    workspace folder." Exit.
-   Run `oracle migrate --path <workspaceRoot> --json` (dry run).
-2. Display the JSON report in a read-only preview editor tab (`Oracle Migration
+2. Run `oracle migrate --path <workspaceRoot> --json` (dry run).
+3. Display the JSON report in a read-only preview editor tab (`Oracle Migration
    Preview`).
-3. Show "Apply Migration" and "Cancel" buttons in a notification.
-4. If "Apply Migration": run `oracle migrate --path <workspaceRoot> --apply --json`.
-5. Refresh the file explorer after apply.
+4. Show "Apply Migration" and "Cancel" buttons in a notification.
+5. If "Apply Migration": run `oracle migrate --path <workspaceRoot> --apply --json`.
+6. Refresh the file explorer after apply.
 
 ## Configuration
 
@@ -128,7 +132,7 @@ Clicking any state opens the Oracle Output channel.
 
 ## CLI Resolution
 
-On activation the plugin runs `oracle --version` (or the configured `oracle.cliPath`).
+On activation the plugin runs `oracle version` (or the configured `oracle.cliPath`).
 
 - If the command succeeds: plugin activates normally.
 - If not found: all commands are registered but disabled; the status bar shows
@@ -170,6 +174,8 @@ the JetBrains persistent state store), and the same error handling contract.
   IntelliJ's built-in runner). Oracle runs tests via its own executor.
 - Web/browser-based IDEs (Theia, Gitpod). May be addressed in a future spec.
 - Automatic Oracle installation from within the plugin.
+- `oracle.recommendOnly` / *Oracle: Recommend Framework* command. No user story
+  drives this in Phase 1. May be revisited if a need is identified.
 
 ## Open Questions
 
