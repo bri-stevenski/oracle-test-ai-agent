@@ -2,7 +2,7 @@
 project: oracle
 version: 1
 created: 2026-05-11
-updated: 2026-05-17
+updated: 2026-05-18
 ---
 
 # Roadmap
@@ -205,10 +205,18 @@ updated: 2026-05-17
 
 ### Visual DOM Self-Healing
 
-- **Status:** planned
+- **Status:** done
 - **Spec:** none
-- **Summary:** TICKET-036 — use visual snapshots or DOM trees to fix
-  brittle UI selectors automatically.
+- **Summary:** TICKET-036 — `SelectorHealer` detects selector-related UI
+  test failures (`TimeoutError`, `locator()`, `getBy*`, `page.click`, strict
+  mode violations, not-attached/not-visible) and routes them to a DOM-aware
+  fix path instead of the generic symbol-grep healer. Extracts the failing
+  selector from the error message; reads DOM context from loose HTML snapshots
+  or `snapshots/*.html` entries inside Playwright `trace.zip` files (truncated
+  at 3 500 chars). Builds a selector-focused prompt that instructs the LLM to
+  prefer `data-testid` and ARIA roles over brittle CSS classes. Wired into
+  `OracleOrchestrator`'s heal loop via `_attempt_selector_fix()`. 36 new
+  tests; 218 total passing.
 - **Blockers:** none
 - **Plan:** none
 
