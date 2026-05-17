@@ -242,27 +242,24 @@ updated: 2026-05-17
 - **Summary:** VS Code and JetBrains plugins exposing Oracle
   generation/execution. Phase 1 (VS Code, TypeScript) ships first.
   Thin-shell design — plugins invoke the installed `oracle` CLI; no LLM
-  code lives in the plugin. 6 commands, output channel, status bar,
+  code lives in the plugin. 5 commands, output channel, status bar,
   CLI resolution, and full error-handling contract specified. PR #50.
-- **Blockers:** 6 open design decisions (see below)
+- **Blockers:** 1 open design decision (see below)
 - **Plan:** none
 
-#### IDE Plugins — Open Design Decisions
+#### IDE Plugins — Design Decisions
 
-Soundness review (harness-soundness-review, spec mode) surfaced the following
-before implementation begins. Each has a GitHub issue for tracking.
+Soundness review (harness-soundness-review, spec mode) surfaced these before
+implementation begins. 5 of 6 resolved in spec PR #59.
 
-| # | Issue | Severity | Finding |
-|---|-------|----------|---------|
-| S1-001 | [#52](https://github.com/bri-stevenski/oracle-test-ai-agent/issues/52) | error | U2 promises component name detection; generate flow omits it |
-| S1-002 | [#53](https://github.com/bri-stevenski/oracle-test-ai-agent/issues/53) | error | oracle.run flow says "stream in real time" but spec assumes batch |
-| S5-001 | [#54](https://github.com/bri-stevenski/oracle-test-ai-agent/issues/54) | error | CLI Resolution uses `oracle --version`; CLI exposes `oracle version` |
-| S5-002 | [#55](https://github.com/bri-stevenski/oracle-test-ai-agent/issues/55) | error | oracle.run flow invokes `oracle run … --json`; run has no `--json` flag |
-| S3-002 | [#56](https://github.com/bri-stevenski/oracle-test-ai-agent/issues/56) | warning | PATH inheritance for VS Code child processes on macOS undocumented |
-| S6-001 | [#57](https://github.com/bri-stevenski/oracle-test-ai-agent/issues/57) | warning | `oracle.recommendOnly` has no user story; confirm scope or remove |
-
-The 4 errors must be resolved before implementation begins. The 2 warnings are
-advisory and can be decided alongside or deferred.
+| # | Issue | Status | Resolution |
+|---|-------|--------|------------|
+| S1-001 | [#52](https://github.com/bri-stevenski/oracle-test-ai-agent/issues/52) | **open** | Awaiting decision on component name detection scope |
+| S1-002 | [#53](https://github.com/bri-stevenski/oracle-test-ai-agent/issues/53) | resolved | Batch output; streaming deferred to follow-up |
+| S5-001 | [#54](https://github.com/bri-stevenski/oracle-test-ai-agent/issues/54) | resolved | Changed to `oracle version` (subcommand) |
+| S5-002 | [#55](https://github.com/bri-stevenski/oracle-test-ai-agent/issues/55) | resolved | Removed `--json` from run invocation |
+| S3-002 | [#56](https://github.com/bri-stevenski/oracle-test-ai-agent/issues/56) | resolved | macOS PATH limitation documented in Assumptions |
+| S6-001 | [#57](https://github.com/bri-stevenski/oracle-test-ai-agent/issues/57) | resolved | `oracle.recommendOnly` moved to Out of Scope |
 
 ### Interactive Guided Onboarding
 
