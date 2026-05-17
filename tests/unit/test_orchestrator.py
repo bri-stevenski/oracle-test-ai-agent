@@ -281,12 +281,10 @@ class TestSelectorHealRouting(unittest.TestCase):
             return original(**kwargs)
 
         with patch.object(orchestrator.selector_healer, 'build_heal_prompt', side_effect=capturing):
-            orchestrator.run("Navigate using the menu", execute=True)
+            result = orchestrator.run("Navigate using the menu", execute=True)
 
         self.assertEqual(captured.get('failing_selector'), '.nav-menu')
-        Path(orchestrator.output_dir / next(
-            f for f in orchestrator.output_dir.iterdir()
-        ).name).unlink(missing_ok=True)
+        Path(result['output_file']).unlink(missing_ok=True)
 
 
 if __name__ == '__main__':
